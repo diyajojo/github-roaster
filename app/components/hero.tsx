@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { Flame } from 'lucide-react';
-import { fetchGitHubData, GitHubUser  } from './userdata';
+import { fetchGitHubData, GitHubUser  } from '../utils/user_data';
 
 export default function HeroSection() {  
 
@@ -12,10 +12,7 @@ export default function HeroSection() {
   const handleFetchData = async () => {
     try {
       const data = await fetchGitHubData(username);
-      setUserData(data);
-      console.log(data.login); // Consider removing these in production
-      console.log(data.bio);
-      console.log(data.repos_url);
+      //setUserData(data);
       setError(null);
     } catch (err) {
       setError((err as Error).message);
@@ -55,8 +52,8 @@ export default function HeroSection() {
           </button>
         </div>
 
-        {/* Error Message Display */}
-        {error && <p className="text-red-500 mt-4">{error}</p>} {/* Display error message */}
+        
+        {error && <p className="text-red-500 mt-4">{error}</p>}
       </div>
     </div>
   );
