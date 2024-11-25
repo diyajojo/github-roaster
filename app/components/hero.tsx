@@ -2,16 +2,18 @@
 import React, { useState } from 'react';
 import { Flame } from 'lucide-react';
 import { fetchGitHubData, GitHubUser  } from '../utils/user_data';
+import {  useRouter } from 'next/navigation';
 
 export default function HeroSection() {  
 
   const [username, setUsername] = useState<string>('');
   const [userData, setUserData] = useState<GitHubUser  | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleFetchData = async () => {
     try {
-      const data = await fetchGitHubData(username);
+      router.push(`/${username}`);
       //setUserData(data);
       setError(null);
     } catch (err) {

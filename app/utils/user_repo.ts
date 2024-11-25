@@ -1,19 +1,21 @@
 export interface GitHubUserRepo {
-  name: string; // Repo name
+  name: string;
   forks: number;
   stargazed_count: number;
   watchers_count: number;
-  readme: string|null;
 }
 
 export const repoIterate = async (username: string): Promise<GitHubUserRepo[]> => {
   let res2: GitHubUserRepo[] = [];
+  const token = process.env.NEXT_PUBLIC_GITHUB_TOKEN;
 
   try {
-    // Fetch user's repositories from GitHub API
-    const userrepo = await fetch(`https://api.github.com/users/${username}/repos`);
+    const userrepo = await fetch(`https://api.github.com/users/${username}/repos?per_page=100`, {
+      headers: {
+        'Authorization': `token ${token}`,
+      },
+    });
     
-    // Check if the response is successful
     if (!userrepo.ok) {
       throw new Error("error");
     }
@@ -21,41 +23,21 @@ export const repoIterate = async (username: string): Promise<GitHubUserRepo[]> =
     const repos = await userrepo.json();
 
     // Process the first 5 repositories
-    const limitedRepos = repos.slice(0, 5); // Limit to first 5 repositories
-    for (const repo of limitedRepos) {
-      try {
-        // Fetch the README file for each repository
-        const readmeResponse = await fetch(`https://api.github.com/repos/${username}/${repo.name}/readme`);
-        if (!readmeResponse.ok) {
-          throw new Error("error");
-        }
+    
+    for (const repo of repos) {
+      // Create a repository data object without README
+      const repoData: GitHubUserRepo = {
+        name: repo.name,
+        forks: repo.forks_count,
+        stargazed_count: repo.stargazers_count,
+        watchers_count: repo.watchers_count,
+      };
 
-        // Parse the README response
-        const readmeData = await readmeResponse.json();
-        let decodedContent = "";
-        if (readmeData.encoding === "base64") {
-          // Decode the base64 content
-          decodedContent = atob(readmeData.content);
-        }
-
-        // Create a repository data object
-        const repoData: GitHubUserRepo = {
-          name: repo.name,
-          forks: repo.forks_count,
-          stargazed_count: repo.stargazers_count,
-          watchers_count: repo.watchers_count,
-          readme: decodedContent,
-        };
-
-        // Add the repository data to the result array
-        res2.push(repoData);
-      } catch (error) {
-        console.log(error);
-      }
+      res2.push(repoData);
     }
   } catch (error) {
     console.log(error);
   }
 
-  return res2; // Return the result array
+  return res2;
 };

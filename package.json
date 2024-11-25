@@ -9,8 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.46.1",
+    "dotenv": "^16.4.5",
     "lucide-react": "^0.460.0",
     "next": "15.0.3",
+    "openai": "^4.73.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
