@@ -1,5 +1,5 @@
 // pages/api/generate_roast.ts
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
@@ -72,4 +72,12 @@ export async function POST(request: Request) {
       status: 500 
     });
   }
+}
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { username: string } }
+) {
+  const username = params.username;
+  // ... rest of your route logic
 }

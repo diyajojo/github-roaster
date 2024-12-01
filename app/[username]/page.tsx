@@ -1,29 +1,42 @@
+import { Metadata } from 'next';
+import RoastPage from '@/components/roastpage';
 import { fetchGitHubData } from '../utils/user_data';
-import RoastPage from '../../components/roastpage';
 
-interface PageProps {
-  params: {
-    username: string;
-  };
-  searchParams: {
-    personality?: string;
+// Define the params type
+type PageParams = {
+  username: string;
+};
+
+// Define the search params type
+type PageSearchParams = {
+  personality?: string;
+};
+
+// Define the props type
+type Props = {
+  params: PageParams;
+  searchParams: PageSearchParams;
+};
+
+// Generate metadata for the page
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  return {
+    title: `Roasting ${params.username} | GitHub Roaster`,
   };
 }
 
-export default async function Page({
-  params,
-  searchParams,
-}: PageProps) {
+// Page component
+export default async function Page(props: Props) {
+  const username = props.params.username;
+  const personality = props.searchParams.personality || 'savage';
+
   try {
-    const username = params.username;
-    const personality = searchParams.personality || 'savage';
-    
     const profiledata = await fetchGitHubData(username);
-    
+
     if (!profiledata) {
       throw new Error('Failed to fetch GitHub data');
     }
-    
+
     return (
       <div className="min-h-screen bg-black">
         <RoastPage 
@@ -44,5 +57,6 @@ export default async function Page({
   }
 }
 
+// Add these exports for Next.js
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
