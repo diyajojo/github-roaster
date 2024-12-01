@@ -22,16 +22,24 @@ export const fetchGitHubData = async (username: string) => {
   }
 
   try {
-    const token = process.env.NEXT_PUBLIC_GITHUB_TOKEN; 
+    const token = process.env.GITHUB_TOKEN;
+    
+    if (!token) {
+      console.error('GitHub token not found in environment variables');
+      throw new Error('GitHub authentication not configured');
+    }
+
     const userData = await fetch(`https://api.github.com/users/${username}`, {
       headers: {
-        'Authorization': `token ${token}`, // Use the token from environment variables
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
       },
     });
 
     if (!userData.ok) {
-      console.log("Username not found");
-      throw new Error('User  not found');
+      const errorData = await userData.json();
+      console.error("GitHub API Error:", errorData);
+      throw new Error(`User not found: ${errorData.message || 'Unknown error'}`);
     }
 
     const info = await userData.json();
