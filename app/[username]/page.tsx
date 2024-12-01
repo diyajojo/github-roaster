@@ -2,35 +2,37 @@ import { Metadata } from 'next';
 import RoastPage from '@/components/roastpage';
 import { fetchGitHubData } from '../utils/user_data';
 
-// Define the params type
-type PageParams = {
-  username: string;
-};
+// Define the params interface
+interface PageParams {
+  username: Promise<string>;
+}
 
-// Define the search params type
-type PageSearchParams = {
+// Define the search params interface
+interface PageSearchParams {
   personality?: string;
-};
+}
 
-// Define the props type
-type Props = {
+// Define the props interface
+interface Props {
   params: PageParams;
   searchParams: PageSearchParams;
-};
+}
 
-// Generate metadata for the page
+// Generate metadata
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const username = await params.username;
   return {
-    title: `Roasting ${params.username} | GitHub Roaster`,
+    title: `Roasting ${username} | GitHub Roaster`,
   };
 }
 
 // Page component
-export default async function Page(props: Props) {
-  const username = props.params.username;
-  const personality = props.searchParams.personality || 'savage';
-
+export default async function Page({ params, searchParams }: Props) {
   try {
+    // Await the username from params
+    const username = await params.username;
+    const personality = searchParams.personality || 'savage';
+
     const profiledata = await fetchGitHubData(username);
 
     if (!profiledata) {
@@ -57,6 +59,7 @@ export default async function Page(props: Props) {
   }
 }
 
-// Add these exports for Next.js
+// Configuration options
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
+export const revalidate = 0;

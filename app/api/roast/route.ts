@@ -74,10 +74,3 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { username: string } }
-) {
-  const username = params.username;
-  // ... rest of your route logic
-}
