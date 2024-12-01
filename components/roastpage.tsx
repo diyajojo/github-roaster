@@ -97,8 +97,15 @@ export default function RoastPage({ profiledata }: RoastPageProps) {
       const result = await response.json();
       setRoast(result.roast);
       const { data, error } = await supabase
-        .from('roast')
-        .insert({ username: profiledata.user.login, roast: result.roast,likes:0 });
+      .from('roast')
+      .insert({ 
+        username: profiledata.user.login, 
+        roast: result.roast,
+        likes: 0 
+      })
+      //to access the single row from the table 
+      .select()  
+      .single(); 
         setLikes(data?.likes || 0);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate roast');
