@@ -3,10 +3,10 @@ import RoastPage from '../../components/roastpage';
 
 interface PageProps {
   params: {
-    username: string
+    username: string;
   };
   searchParams: {
-    personality?: string
+    personality?: string;
   };
 }
 
@@ -14,11 +14,10 @@ export default async function Page({
   params,
   searchParams,
 }: PageProps) {
-  const username = await params.username;
-  const personality = await searchParams.personality || 'savage';
-  
   try {
-    // Fetch all GitHub data
+    const username = params.username;
+    const personality = searchParams.personality || 'savage';
+    
     const profiledata = await fetchGitHubData(username);
     
     if (!profiledata) {
@@ -38,7 +37,7 @@ export default async function Page({
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-red-500 text-center">
           <h2 className="text-xl font-bold mb-2">Error</h2>
-          <p>{(error as Error).message}</p>
+          <p>{error instanceof Error ? error.message : 'An error occurred'}</p>
         </div>
       </div>
     );
@@ -46,3 +45,4 @@ export default async function Page({
 }
 
 export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
