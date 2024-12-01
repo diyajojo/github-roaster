@@ -1,23 +1,58 @@
 'use client';
 import React, { useState } from 'react';
-import { Flame } from 'lucide-react';
-import {  useRouter } from 'next/navigation';
+import { Flame, ChevronDown } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+
+const personalities = [
+  {
+    id: 'savage',
+    name: 'Savage Mode 🔥',
+    description: 'No mercy, maximum roasting',
+    style: 'from-red-500 to-orange-500'
+  },
+  {
+    id: 'funny',
+    name: 'Meme Lord 😎',
+    description: 'Humorous and witty roasts',
+    style: 'from-purple-500 to-pink-500'
+  },
+  {
+    id: 'professional',
+    name: 'Code Reviewer 💻',
+    description: 'Professional code critique',
+    style: 'from-blue-500 to-cyan-500'
+  },
+  {
+    id: 'shakespeare',
+    name: 'Shakespeare 🎭',
+    description: 'Poetic roasts in old English',
+    style: 'from-yellow-500 to-amber-500'
+  }
+];
 
 export default function HeroSection() {  
-
   const [username, setUsername] = useState<string>('');
+  const [personality, setPersonality] = useState<string>('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const handleFetchData = async () => {
+    if (!personality) {
+      setError('Please select a roast style first!');
+      return;
+    }
+    
     try {
-      router.push(`/${username}`);
+      router.push(`/${username}?personality=${personality}`);
       setError(null);
-    } 
-    catch (err) {
+    } catch (err) {
       setError((err as Error).message);
     }
   };
+
+  const selectedPersonality = personalities.find(p => p.id === personality);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-20">
@@ -33,6 +68,49 @@ export default function HeroSection() {
         <p className="text-sm sm:text-base text-gray-500 mb-6 sm:mb-8 px-4">
           We'll analyze your repos, commits, and coding habits to serve up the spiciest roasts in tech
         </p>
+        
+        {/* Personality Dropdown */}
+        <div className="mb-5">
+          <div className="relative max-w-2xl mx-auto px-4">
+            <button 
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="w-64 mx-auto p-3 rounded-xl border-2 transition-all duration-200 text-left bg-gray-800/50 border-gray-700 text-white flex justify-between items-center"
+            >
+              <div>
+                <div className="text-lg mb-1 ">
+                  {selectedPersonality ? selectedPersonality.name : 'Select Roast Style'}
+                </div>
+              </div>
+              <ChevronDown className="text-gray-400" />
+            </button>
+
+            {isDropdownOpen && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute z-10 mt-2 w-full bg-gray-800 rounded-xl shadow-lg border border-gray-700 max-h-48 overflow-y-auto"
+              >
+                {personalities.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => {
+                      setPersonality(p.id);
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`w-full text-left p-3 hover:bg-gray-700 transition-colors first:rounded-t-xl last:rounded-b-xl ${
+                      personality === p.id 
+                        ? `bg-gradient-to-r ${p.style} text-white`
+                        : 'text-gray-300'
+                    }`}
+                  >
+                    <div className="text-base mb-1">{p.name}</div>
+                    <div className="text-xs opacity-80">{p.description}</div>
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </div>
+        </div>
 
         {/* Search Bar */}
         <div className="relative max-w-md mx-auto px-4 sm:px-0">
@@ -51,9 +129,8 @@ export default function HeroSection() {
           </button>
         </div>
 
-        
         {error && <p className="text-red-500 mt-4">{error}</p>}
       </div>
     </div>
   );
-};
+}
