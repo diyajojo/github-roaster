@@ -10,13 +10,13 @@ export default async function Page({
   
   try {
     // Fetch all GitHub data
-    const data = await fetchGitHubData(username);
+    const profiledata = await fetchGitHubData(username);
     
     // Note: fetchGitHubData already calls repoIterate and fetchRepoCommitDetails internally
     
     return( 
     <div>
-    <RoastPage data={data} />
+    <RoastPage profiledata={profiledata} />
     </div>
     );
   } catch (error) {

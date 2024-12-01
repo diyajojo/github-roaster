@@ -1,9 +1,11 @@
 'use client';
 import React, { useState } from 'react';
 import { Flame, Menu, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';  
 
 export default function NavBar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <nav className="sticky top-0 z-50 backdrop-blur-md bg-black/30 border-b border-gray-800">
@@ -28,10 +30,16 @@ export default function NavBar() {
           </button>
           {/* Desktop Navigation */}
           <div className="hidden md:flex space-x-4">
-            <button className="px-4 py-2 rounded-full bg-gradient-to-r from-orange-400 to-red-400 text-transparent bg-clip-text font-semibold hover:from-orange-300 hover:to-red-300 transition-colors">
+            <button 
+              onClick={() => router.push('/')}
+              className="px-4 py-2 rounded-full bg-gradient-to-r from-orange-400 to-red-400 text-transparent bg-clip-text font-semibold hover:from-orange-300 hover:to-red-300 transition-colors"
+            >
               Home
             </button>
-            <button className="px-4 py-2 rounded-full bg-gradient-to-r from-orange-400 to-red-400 text-transparent bg-clip-text font-semibold hover:from-orange-300 hover:to-red-300 transition-colors">
+            <button 
+              onClick={() => router.push('/top-roasts')}
+              className="px-4 py-2 rounded-full bg-gradient-to-r from-orange-400 to-red-400 text-transparent bg-clip-text font-semibold hover:from-orange-300 hover:to-red-300 transition-colors"
+            >
               Top Roasts
             </button>
           </div>

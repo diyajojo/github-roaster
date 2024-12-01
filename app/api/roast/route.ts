@@ -2,6 +2,15 @@
 import { NextResponse } from 'next/server';
 import { OpenAI } from 'openai';
 
+export interface GitHubUser  {
+  login: string; // username
+  followers: number;
+  following: number;
+  public_repos: number;
+  bio: string;
+  readme?: string;
+}
+
 // Interface for Repository Data
 interface Repo {
   name: string;
@@ -22,6 +31,7 @@ const openai = new OpenAI({
   apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
 });
 
+//line 25 creates the api endpoint api/roast
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -43,7 +53,7 @@ export async function POST(request: Request) {
       - Projects: ${repos.slice(0, 3).map((r: Repo) => r.name)}
       - Recent commit messages: ${commits[0]?.commitMessages.slice(0, 2)}
 
-      Generate a funny 6-7 sentence coding-related roast. End with a tiny compliment. Don't mention any specific numbers or repository names.
+      Generate a funny 6-7 sentence roast. It should be not only related to coding , make it as funny as possible in simple words End with a tiny compliment.  You can also roast the user's profille picture as well as talk about their bio and roast any one of their repositories.
     `;
 
     // Call OpenAI API for chat completion

@@ -1,7 +1,6 @@
 'use client';
 import React, { useState } from 'react';
 import { Flame } from 'lucide-react';
-import { fetchGitHubData, GitHubUser  } from '../utils/user_data';
 import {  useRouter } from 'next/navigation';
 
 export default function HeroSection() {  
@@ -13,9 +12,9 @@ export default function HeroSection() {
   const handleFetchData = async () => {
     try {
       router.push(`/${username}`);
-      //setUserData(data);
       setError(null);
-    } catch (err) {
+    } 
+    catch (err) {
       setError((err as Error).message);
     }
   };
@@ -40,7 +39,7 @@ export default function HeroSection() {
           <input
             onChange={(e) => setUsername(e.target.value)}
             type="text"
-            placeholder="dare you to enter your username"
+            placeholder="enter your username"
             className="w-full px-4 sm:px-6 py-3 sm:py-4 bg-gray-800/50 border border-gray-700 rounded-xl sm:rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all text-sm sm:text-base"
           />
           <button
