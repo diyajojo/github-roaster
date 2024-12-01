@@ -7,27 +7,28 @@ import SampleRoast from './components/sample';
 import FooterSection from './components/footer';
 
 export default function Home() {
-  const [isMounted, setIsMounted] = useState(false);
+  // 1. First: Component mounts with initial state
+  const [isMounted, setIsMounted] = useState(false); // initially false
 
+  // 3. Third: useEffect runs after first render is complete
   useEffect(() => {
-    setIsMounted(true);
+    setIsMounted(true);  // triggers re-render with isMounted = true
   }, []);
 
-  // Only render the content after component is mounted on the client
+  // 2. Second: This check runs during initial render
   if (!isMounted) {
-    return null;
+    return null;  // nothing shown initially
   }
 
+  // 4. Fourth: After re-render due to isMounted becoming true
   return (
-    <div className="bg-gradient-to-br from-gray-900 via-purple-900 to-black min-h-screen flex flex-col">
-      <NavBar />
-      <main className="flex-grow">
+    <div>
+      <NavBar /> 
+      <main  className="flex-grow">
         <HeroSection />
         <Features/>
-        <SampleRoast/>
+        <FooterSection/>
       </main>
-      <FooterSection/>
     </div>
   );
 }
-
