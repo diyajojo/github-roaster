@@ -7,7 +7,6 @@ import {  useRouter } from 'next/navigation';
 export default function HeroSection() {  
 
   const [username, setUsername] = useState<string>('');
-  const [userData, setUserData] = useState<GitHubUser  | null>(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -18,7 +17,6 @@ export default function HeroSection() {
       setError(null);
     } catch (err) {
       setError((err as Error).message);
-      setUserData(null);
     }
   };
 
