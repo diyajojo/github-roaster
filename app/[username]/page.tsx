@@ -33,7 +33,7 @@ export default async function Page({
 
     return (
       <div className="min-h-screen bg-black">
-        <RoastPage profiledata={profiledata} personality={personality} />
+        <RoastPage profiledata={profiledata} personality={personality || 'savage'} />
       </div>
     );
   } catch (error) {
