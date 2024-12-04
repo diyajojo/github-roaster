@@ -6,6 +6,7 @@ import RoastError from './roasterror';
 import { Flame, Heart, Share2, Repeat } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { nanoid } from 'nanoid';
 
 interface RoastPageProps {
   profiledata: {
@@ -51,18 +52,17 @@ export default function RoastPage({ profiledata, personality }: RoastPageProps) 
   const fetchRoast = async () => {
     try {
       setLoading(true);
-      const urlRoast = searchParams.get('roast');
+      const existingId = searchParams.get('r');
       
-      if (urlRoast) {
-        setRoast(decodeURIComponent(urlRoast));
+      if (existingId) {
         const { data } = await supabase
           .from('roast')
-          .select('likes')
-          .eq('username', profiledata.user.login)
-          .eq('roast', decodeURIComponent(urlRoast))
+          .select('roast, likes')
+          .eq('short_id', existingId)
           .single();
         
         if (data) {
+          setRoast(data.roast);
           setLikes(data.likes);
         }
         setLoading(false);
@@ -98,13 +98,17 @@ export default function RoastPage({ profiledata, personality }: RoastPageProps) 
 
       setRoast(result.roast);
       
-      // Supabase insert
+      // Generate a short ID (8 characters)
+      const newShortId = nanoid(8);
+
+      // Supabase insert with short_id
       const { data, error: supabaseError } = await supabase
         .from('roast')
         .insert({ 
           username: profiledata.user.login, 
           roast: result.roast,
-          likes: 0 
+          likes: 0,
+          short_id: newShortId
         })
         .select()
         .single();
@@ -113,10 +117,9 @@ export default function RoastPage({ profiledata, personality }: RoastPageProps) 
         console.error('Supabase error:', supabaseError);
       } else {
         setLikes(data?.likes || 0);
+        const newUrl = `${window.location.pathname}?r=${newShortId}`;
+        router.push(newUrl);
       }
-
-      const newUrl = `${window.location.pathname}?roast=${encodeURIComponent(result.roast)}`;
-      router.push(newUrl);
     } catch (err) {
       console.error('Fetch error:', err);
       setError(err instanceof Error ? err.message : 'Failed to generate roast');
@@ -127,7 +130,18 @@ export default function RoastPage({ profiledata, personality }: RoastPageProps) 
 
   const handleShare = async () => {
     try {
-      const shareUrl = `${window.location.origin}${window.location.pathname}?roast=${encodeURIComponent(roast)}`;
+      const { data } = await supabase
+        .from('roast')
+        .select('short_id')
+        .eq('username', profiledata.user.login)
+        .eq('roast', roast)
+        .single();
+      
+      if (!data?.short_id) {
+        throw new Error('Roast not found');
+      }
+
+      const shareUrl = `${window.location.origin}${window.location.pathname}?r=${data.short_id}`;
       
       if (navigator.share) {
         await navigator.share({
