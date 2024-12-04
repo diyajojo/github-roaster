@@ -5,6 +5,7 @@ import RoastLoading from './roastloading';
 import RoastError from './roasterror';
 import { Flame, Heart, Share2, Repeat } from 'lucide-react';
 import { toast } from 'sonner';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface RoastPageProps {
   profiledata: {
@@ -18,6 +19,8 @@ interface RoastPageProps {
 }
 
 export default function RoastPage({ profiledata, personality }: RoastPageProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [roast, setRoast] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
@@ -48,6 +51,24 @@ export default function RoastPage({ profiledata, personality }: RoastPageProps) 
   const fetchRoast = async () => {
     try {
       setLoading(true);
+      const urlRoast = searchParams.get('roast');
+      
+      if (urlRoast) {
+        setRoast(decodeURIComponent(urlRoast));
+        const { data } = await supabase
+          .from('roast')
+          .select('likes')
+          .eq('username', profiledata.user.login)
+          .eq('roast', decodeURIComponent(urlRoast))
+          .single();
+        
+        if (data) {
+          setLikes(data.likes);
+        }
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch('/api/roast', {
         method: 'POST',
         headers: {
@@ -93,6 +114,9 @@ export default function RoastPage({ profiledata, personality }: RoastPageProps) 
       } else {
         setLikes(data?.likes || 0);
       }
+
+      const newUrl = `${window.location.pathname}?roast=${encodeURIComponent(result.roast)}`;
+      router.push(newUrl);
     } catch (err) {
       console.error('Fetch error:', err);
       setError(err instanceof Error ? err.message : 'Failed to generate roast');
@@ -103,15 +127,17 @@ export default function RoastPage({ profiledata, personality }: RoastPageProps) 
 
   const handleShare = async () => {
     try {
+      const shareUrl = `${window.location.origin}${window.location.pathname}?roast=${encodeURIComponent(roast)}`;
+      
       if (navigator.share) {
         await navigator.share({
           title: 'GitHub Roast',
           text: roast,
-          url: window.location.href,
+          url: shareUrl,
         });
       } else {
-        await navigator.clipboard.writeText(roast);
-        toast.success('Roast copied to clipboard!');
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success('Roast URL copied to clipboard!');
       }
     } catch (err) {
       toast.error('Failed to share roast');
