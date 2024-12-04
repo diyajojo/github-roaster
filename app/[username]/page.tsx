@@ -23,7 +23,7 @@ export default async function Page({
   try {
     // Await the username from params
     const { username: fullParam } = await params;
-    const [username, personality] = fullParam.split('&&');
+    const [username, personality] = decodeURIComponent(fullParam).split("&&");
 
     const profiledata = await fetchGitHubData(username);
 
