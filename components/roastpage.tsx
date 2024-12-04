@@ -130,18 +130,37 @@ export default function RoastPage({ profiledata, personality }: RoastPageProps) 
 
   const handleShare = async () => {
     try {
-      const { data } = await supabase
-        .from('roast')
-        .select('short_id')
-        .eq('username', profiledata.user.login)
-        .eq('roast', roast)
-        .single();
+      // First check if we already have an ID in the URL
+      const currentId = searchParams.get('r');
       
-      if (!data?.short_id) {
-        throw new Error('Roast not found');
+      let shareId;
+      if (currentId) {
+        shareId = currentId;
+      } else {
+        // If no ID exists, create a new one and save to database
+        const newShortId = nanoid(8);
+        const { data: insertData, error: insertError } = await supabase
+          .from('roast')
+          .insert({ 
+            username: profiledata.user.login, 
+            roast: roast,
+            likes: likes,
+            short_id: newShortId
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          throw new Error('Failed to save roast');
+        }
+        shareId = newShortId;
+        
+        // Update URL with new ID
+        const newUrl = `${window.location.pathname}?r=${newShortId}`;
+        router.push(newUrl);
       }
 
-      const shareUrl = `${window.location.origin}${window.location.pathname}?r=${data.short_id}`;
+      const shareUrl = `${window.location.origin}${window.location.pathname}?r=${shareId}`;
       
       if (navigator.share) {
         await navigator.share({
@@ -154,6 +173,7 @@ export default function RoastPage({ profiledata, personality }: RoastPageProps) 
         toast.success('Roast URL copied to clipboard!');
       }
     } catch (err) {
+      console.error('Share error:', err);
       toast.error('Failed to share roast');
     }
   };
