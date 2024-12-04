@@ -1,50 +1,39 @@
-import { Metadata } from 'next';
-import RoastPage from '@/components/roastpage';
-import { fetchGitHubData } from '../utils/user_data';
-
-// Define the params interface
-interface PageParams {
-  username: Promise<string>;
-}
-
-// Define the search params interface
-interface PageSearchParams {
-  personality?: string;
-}
-
-// Define the props interface
-interface Props {
-  params: PageParams;
-  searchParams: PageSearchParams;
-}
+import { Metadata } from "next";
+import RoastPage from "@/components/roastpage";
+import { fetchGitHubData } from "../utils/user_data";
 
 // Generate metadata
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const username = await params.username;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ username: string }>;
+}): Promise<Metadata> {
+  const { username } = await params;
   return {
     title: `Roasting ${username} | GitHub Roaster`,
   };
 }
 
 // Page component
-export default async function Page({ params, searchParams }: Props) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ username: string }>;
+}) {
   try {
     // Await the username from params
-    const username = await params.username;
-    const personality = searchParams.personality || 'savage';
+    const { username: fullParam } = await params;
+    const [username, personality] = fullParam.split('&&');
 
     const profiledata = await fetchGitHubData(username);
 
     if (!profiledata) {
-      throw new Error('Failed to fetch GitHub data');
+      throw new Error("Failed to fetch GitHub data");
     }
 
     return (
       <div className="min-h-screen bg-black">
-        <RoastPage 
-          profiledata={profiledata} 
-          personality={personality}
-        />
+        <RoastPage profiledata={profiledata} personality={personality} />
       </div>
     );
   } catch (error) {
@@ -52,7 +41,7 @@ export default async function Page({ params, searchParams }: Props) {
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-red-500 text-center">
           <h2 className="text-xl font-bold mb-2">Error</h2>
-          <p>{error instanceof Error ? error.message : 'An error occurred'}</p>
+          <p>{error instanceof Error ? error.message : "An error occurred"}</p>
         </div>
       </div>
     );
@@ -60,6 +49,5 @@ export default async function Page({ params, searchParams }: Props) {
 }
 
 // Configuration options
-export const dynamic = 'force-dynamic';
-export const dynamicParams = true;
+export const dynamic = "force-dynamic";
 export const revalidate = 0;

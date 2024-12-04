@@ -45,7 +45,7 @@ export default function HeroSection() {
     }
     
     try {
-      router.push(`/${username}?personality=${personality}`);
+      router.push(`/${username}&&${personality}`);
       setError(null);
     } catch (err) {
       setError((err as Error).message);
