@@ -71,7 +71,7 @@ export default function HeroSection() {
         
         {/* Personality Dropdown */}
         <div className="mb-5">
-          <div className="relative max-w-2xl mx-auto px-4">
+          <div className="relative flex flex-col items-center">
             <button 
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="w-64 mx-auto py-2 px-3 rounded-xl border-2 transition-all duration-200 text-left bg-gray-800/50 border-gray-700 text-white flex justify-between items-center"
@@ -88,7 +88,7 @@ export default function HeroSection() {
               <motion.div 
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="absolute z-10 mt-2 w-full bg-gray-800 rounded-xl shadow-lg border border-gray-700 max-h-48 overflow-y-auto"
+                className="absolute z-10 mt-2 w-64 bg-gray-800 rounded-xl shadow-lg border border-gray-700 max-h-48 overflow-y-auto top-full"
               >
                 {personalities.map((p) => (
                   <button
@@ -103,7 +103,7 @@ export default function HeroSection() {
                         : 'text-gray-300'
                     }`}
                   >
-                    <div className="text-base mb-1">{p.name}</div>
+                    <div className="text-sm mb-1">{p.name}</div>
                     <div className="text-xs opacity-80">{p.description}</div>
                   </button>
                 ))}
