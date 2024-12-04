@@ -3,10 +3,10 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/app/utils/supabase';
 import RoastLoading from './roastloading';
 import RoastError from './roasterror';
-import { Flame, Heart, Share2, Repeat } from 'lucide-react';
-import { toast } from 'sonner';
+import { Flame, Heart, Repeat } from 'lucide-react';
+
 import { useRouter, useSearchParams } from 'next/navigation';
-import { nanoid } from 'nanoid';
+
 
 interface RoastPageProps {
   profiledata: {
@@ -45,7 +45,6 @@ export default function RoastPage({ profiledata, personality }: RoastPageProps) 
       }
     } catch (error) {
       console.error('Error updating likes:', error);
-      toast.error('Failed to update like');
     }
   };
 
@@ -99,7 +98,7 @@ export default function RoastPage({ profiledata, personality }: RoastPageProps) 
       setRoast(result.roast);
       
       // Generate a short ID (8 characters)
-      const newShortId = nanoid(8);
+      
 
       // Supabase insert with short_id
       const { data, error: supabaseError } = await supabase
@@ -108,7 +107,6 @@ export default function RoastPage({ profiledata, personality }: RoastPageProps) 
           username: profiledata.user.login, 
           roast: result.roast,
           likes: 0,
-          short_id: newShortId
         })
         .select()
         .single();
@@ -117,64 +115,13 @@ export default function RoastPage({ profiledata, personality }: RoastPageProps) 
         console.error('Supabase error:', supabaseError);
       } else {
         setLikes(data?.likes || 0);
-        const newUrl = `${window.location.pathname}?r=${newShortId}`;
-        router.push(newUrl);
+  
       }
     } catch (err) {
       console.error('Fetch error:', err);
       setError(err instanceof Error ? err.message : 'Failed to generate roast');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleShare = async () => {
-    try {
-      // First check if we already have an ID in the URL
-      const currentId = searchParams.get('r');
-      
-      let shareId;
-      if (currentId) {
-        shareId = currentId;
-      } else {
-        // If no ID exists, create a new one and save to database
-        const newShortId = nanoid(8);
-        const { data: insertData, error: insertError } = await supabase
-          .from('roast')
-          .insert({ 
-            username: profiledata.user.login, 
-            roast: roast,
-            likes: likes,
-            short_id: newShortId
-          })
-          .select()
-          .single();
-
-        if (insertError) {
-          throw new Error('Failed to save roast');
-        }
-        shareId = newShortId;
-        
-        // Update URL with new ID
-        const newUrl = `${window.location.pathname}?r=${newShortId}`;
-        router.push(newUrl);
-      }
-
-      const shareUrl = `${window.location.origin}${window.location.pathname}?r=${shareId}`;
-      
-      if (navigator.share) {
-        await navigator.share({
-          title: 'GitHub Roast',
-          text: roast,
-          url: shareUrl,
-        });
-      } else {
-        await navigator.clipboard.writeText(shareUrl);
-        toast.success('Roast URL copied to clipboard!');
-      }
-    } catch (err) {
-      console.error('Share error:', err);
-      toast.error('Failed to share roast');
     }
   };
 
@@ -238,12 +185,6 @@ export default function RoastPage({ profiledata, personality }: RoastPageProps) 
             <span className="text-white">{likes}</span>
           </button>
         </div>
-        <button
-          onClick={handleShare}
-          className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm transition-colors"
-        >
-          Share Roast
-        </button>
       </div>
     </div>
   </div>
