@@ -38,7 +38,8 @@ export async function POST(request: Request) {
       - Following: ${profiledata.user.following}
       - Bio: ${profiledata.user.bio || 'No bio provided'}
       
-      Create a ${personality}-style roast based on this data in 6-5 lines and simple words.
+      Create a ${personality}-style roast.
+      Take a look at this GitHub profile and craft a short, playful roast. Highlight any amusing patterns like an obsession with 'Hello World' projects, abandoned repos, or chaotic commit messages. Keep it snappy, humorous, and balanced with clever comebacks to make sure the roast feels light-hearted yet engaging
     `;
 
     // Call OpenAI API

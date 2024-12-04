@@ -74,10 +74,10 @@ export default function HeroSection() {
           <div className="relative max-w-2xl mx-auto px-4">
             <button 
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-64 mx-auto p-3 rounded-xl border-2 transition-all duration-200 text-left bg-gray-800/50 border-gray-700 text-white flex justify-between items-center"
+              className="w-64 mx-auto py-2 px-3 rounded-xl border-2 transition-all duration-200 text-left bg-gray-800/50 border-gray-700 text-white flex justify-between items-center"
             >
               <div>
-                <div className="text-lg mb-1 ">
+                <div className="text-sm">
                   {selectedPersonality ? selectedPersonality.name : 'Select Roast Style'}
                 </div>
               </div>
