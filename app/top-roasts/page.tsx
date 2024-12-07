@@ -17,19 +17,36 @@ export default function TopRoasts() {
   const [loading, setLoading] = useState<boolean>(true);
   const [sortMethod, setSortMethod] = useState<'recent' | 'popular'>('recent');
   const [selectedRoast, setSelectedRoast] = useState<Roast | null>(null);
-  const supabase = createClientComponentClient();
 
-  const handleLike = async (roastId: string, currentLikes: number) => {
-    try {
-      const { error } = await supabase
-        .from('roast')
-        .update({ likes: currentLikes + 1 })
-        .eq('id', roastId);
 
-      if (error) {
-        throw error;
+  useEffect(() => {
+    async function fetchTopRoasts() {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/roasts', { method: 'GET' });
+        if (!response.ok) {
+          throw new Error('Failed to fetch top roasts');
+        }
+        const data = await response.json();
+        setRoasts(data);
+      } catch (error) {
+        console.error('Error fetching roasts:', error);
+      } finally {
+        setLoading(false);
       }
+    }
 
+    fetchTopRoasts();
+  }, []);
+
+  const handleLike = async (roastId: string, likes: number) => {
+    try {
+      const response = await fetch(`/api/roasts/${roastId}`, { method: 'POST' });
+      if (!response.ok) {
+        throw new Error('Failed to like roast');
+      }
+      
+      // Update both the roasts list and the selected roast if open
       setRoasts(prevRoasts => 
         prevRoasts.map(roast => 
           roast.id === roastId 
@@ -37,6 +54,11 @@ export default function TopRoasts() {
             : roast
         )
       );
+      
+      // Update the selected roast if it's the one being liked
+      if (selectedRoast && selectedRoast.id === roastId) {
+        setSelectedRoast(prev => prev ? { ...prev, likes: prev.likes + 1 } : null);
+      }
     } catch (error) {
       console.error('Error liking roast:', error);
     }
@@ -50,43 +72,8 @@ export default function TopRoasts() {
       }
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
-    //sets it back to roasts
     setRoasts(sortedRoasts);
   };
-
-  useEffect(() => {
-    async function fetchTopRoasts() {
-      try {
-        const { data, error } = await supabase
-          .from('roast')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) {
-          console.log('Supabase error in fetching roasts:', error);
-          return;
-        }
-
-        if (data) {
-          const uniqueRoasts = data.reduce((acc: Roast[], current) => {
-            const exists = acc.some(item => item.username === current.username);
-            if (!exists) {
-              acc.push(current);
-            }
-            return acc;
-          }, []);
-
-          setRoasts(uniqueRoasts);
-        }
-      } catch (error) {
-        console.log('Error fetching roasts:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchTopRoasts();
-  }, []);
 
   const openGitHubProfile = (username: string) => {
     window.open(`https://github.com/${username}`, '_blank');

@@ -1,11 +1,16 @@
 'use client';
+import { createClient } from '@supabase/supabase-js';
 import { useState, useEffect } from 'react';
-import { supabase } from '@/app/utils/supabase';
 import RoastLoading from './roastloading';
 import RoastError from './roasterror';
 import { Flame, Heart, Repeat } from 'lucide-react';
-
 import { useRouter, useSearchParams } from 'next/navigation';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
 
 
 interface RoastPageProps {
@@ -97,7 +102,7 @@ export default function RoastPage({ profiledata, personality }: RoastPageProps) 
 
       setRoast(result.roast);
       
-      // Generate a short ID (8 characters)
+     
       
 
       // Supabase insert with short_id
