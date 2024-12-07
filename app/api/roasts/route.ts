@@ -1,6 +1,6 @@
 
 import { NextResponse } from 'next/server';
-import { supabase } from '@/app/utils/supabase';
+import { supabase } from '@/app/utils/supabase/server';
 
 
 export async function GET(request: Request) {

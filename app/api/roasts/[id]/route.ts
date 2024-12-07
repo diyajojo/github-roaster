@@ -1,4 +1,4 @@
-import { supabase } from '@/app/utils/supabase';
+import { supabase } from '@/app/utils/supabase/server';
 import { NextResponse } from 'next/server';
 
 

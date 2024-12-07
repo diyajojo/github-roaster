@@ -1,6 +1,7 @@
 // pages/api/generate_roast.ts
-import { NextResponse, NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { supabase } from '@/app/utils/supabase/server';  // Use server-side client
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
@@ -62,8 +63,27 @@ export async function POST(request: Request) {
       );
     }
 
-    // Return successful response
-    return NextResponse.json({ roast: roastContent });
+    // Insert roast using server-side Supabase client
+    const { data: roastData, error: insertError } = await supabase
+      .from('roast')
+      .insert({ 
+        username: profiledata.user.login, 
+        roast: roastContent,
+        likes: 0
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('Database insert error:', insertError);
+      return NextResponse.json(
+        { error: 'Failed to save roast' },
+        { status: 500 }
+      );
+    }
+
+    // Return successful response with the roast data
+    return NextResponse.json({ roast: roastContent, data: roastData });
 
   } catch (error) {
     console.error('API Error:', error);

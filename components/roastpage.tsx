@@ -1,16 +1,9 @@
 'use client';
-import { createClient } from '@supabase/supabase-js';
 import { useState, useEffect } from 'react';
 import RoastLoading from './roastloading';
 import RoastError from './roasterror';
 import { Flame, Heart, Repeat } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
 
 
 interface RoastPageProps {
@@ -23,6 +16,10 @@ interface RoastPageProps {
   };
   personality: string;
 }
+
+const generateShortId = () => {
+  return Math.random().toString(36).substring(2, 8);
+};
 
 export default function RoastPage({ profiledata, personality }: RoastPageProps) {
   const router = useRouter();
@@ -38,13 +35,19 @@ export default function RoastPage({ profiledata, personality }: RoastPageProps) 
       const newLikedState = !isLiked;
       const newLikesCount = newLikedState ? likes + 1 : likes - 1;
 
-      const { error } = await supabase
-        .from('roast')
-        .update({ likes: newLikesCount })
-        .eq('username', profiledata.user.login)
-        .eq('roast', roast);
-      
-      if (!error) {
+      const response = await fetch('/api/roasts/like', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: profiledata.user.login,
+          roast: roast,
+          likes: newLikesCount
+        }),
+      });
+
+      if (response.ok) {
         setLikes(newLikesCount);
         setIsLiked(newLikedState);
       }
@@ -56,23 +59,6 @@ export default function RoastPage({ profiledata, personality }: RoastPageProps) 
   const fetchRoast = async () => {
     try {
       setLoading(true);
-      const existingId = searchParams.get('r');
-      
-      if (existingId) {
-        const { data } = await supabase
-          .from('roast')
-          .select('roast, likes')
-          .eq('short_id', existingId)
-          .single();
-        
-        if (data) {
-          setRoast(data.roast);
-          setLikes(data.likes);
-        }
-        setLoading(false);
-        return;
-      }
-
       const response = await fetch('/api/roast', {
         method: 'POST',
         headers: {
@@ -85,43 +71,15 @@ export default function RoastPage({ profiledata, personality }: RoastPageProps) 
         }),
       });
 
-      const responseText = await response.text();
-      console.log('API Response:', responseText);
-
-      let result;
-      try {
-        result = JSON.parse(responseText);
-      } catch (e) {
-        console.error('Failed to parse response:', responseText);
-        throw new Error('Invalid response from server');
-      }
+      const result = await response.json();
 
       if (!response.ok) {
         throw new Error(result.error || 'Failed to generate roast');
       }
 
       setRoast(result.roast);
+      setLikes(result.data?.likes || 0);
       
-     
-      
-
-      // Supabase insert with short_id
-      const { data, error: supabaseError } = await supabase
-        .from('roast')
-        .insert({ 
-          username: profiledata.user.login, 
-          roast: result.roast,
-          likes: 0,
-        })
-        .select()
-        .single();
-      
-      if (supabaseError) {
-        console.error('Supabase error:', supabaseError);
-      } else {
-        setLikes(data?.likes || 0);
-  
-      }
     } catch (err) {
       console.error('Fetch error:', err);
       setError(err instanceof Error ? err.message : 'Failed to generate roast');
